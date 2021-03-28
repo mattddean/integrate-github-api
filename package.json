@@ -1,0 +1,44 @@
+{
+  "name": "integrate-github-api",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "build-prod": "rm -rf dist && tsc --sourceMap false",
+    "dev": "ts-node-dev --transpile-only --no-notify src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattddean/integrate-github-api.git"
+  },
+  "author": "mdean400@gmail.com",
+  "bugs": {
+    "url": "https://github.com/mattddean/integrate-github-api/issues"
+  },
+  "homepage": "https://github.com/mattddean/integrate-github-api#readme",
+  "dependencies": {
+    "@apollo/client": "^3.3.13",
+    "apollo-cache-inmemory": "^1.6.6",
+    "apollo-link-http": "^1.5.17",
+    "express": "^4.17.1",
+    "graphql": "^15.5.0",
+    "graphql-tag": "^2.11.0",
+    "i": "^0.3.6",
+    "node-fetch": "^2.6.1",
+    "npm": "^7.7.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.11",
+    "@types/node": "^14.14.37",
+    "@types/node-fetch": "^2.5.8",
+    "@typescript-eslint/eslint-plugin": "^4.17.0",
+    "@typescript-eslint/parser": "^4.17.0",
+    "eslint": "^7.22.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "prettier": "^2.2.1",
+    "ts-node-dev": "^1.1.6",
+    "typescript": "^4.2.3"
+  }
+}
