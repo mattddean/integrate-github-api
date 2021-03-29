@@ -11,7 +11,7 @@ services:
     ports:
       - 8080:3000
     volumes:
-      - ./src:/usr/src/app
+      - ./api:/usr/src/app
       - backend_home_npm:/home/node/.npm
     environment:
       GITHUB_TOKEN: ${GITHUB_TOKEN}
