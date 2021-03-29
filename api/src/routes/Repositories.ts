@@ -1,10 +1,10 @@
 import { Router } from "express";
 // import { logIn, logOut } from "../auth";
-import { catchAsyncRequest, InternalError } from "../middleware";
+import { catchAsyncRequest } from "../middleware";
 // import { validate, loginSchema } from "../validation";
 import gql from "graphql-tag";
 import { ApolloClient, NormalizedCacheObject } from "@apollo/client/core";
-import { FailedToGetAllReposError, InternalServerError } from "../errors";
+import { FailedToGetAllReposError } from "../errors";
 
 class Repositories {
   #router = Router();
@@ -19,21 +19,19 @@ class Repositories {
       catchAsyncRequest(async (req, res) => {
         const query = gql`
           query Repostiories {
-            search(
-              query: "org:google created:>2007-10-29 is:public"
-              type: REPOSITORY
-              first: 100
-            ) {
-              nodes {
-                ... on Repository {
-                  name
+            organization(login: "Google") {
+              repositories(first: 100) {
+                edges {
+                  node {
+                    name
+                  }
                 }
-              }
-              repositoryCount
-              pageInfo {
-                startCursor
-                hasNextPage
-                endCursor
+                totalCount
+                pageInfo {
+                  startCursor
+                  hasNextPage
+                  endCursor
+                }
               }
             }
             rateLimit {
@@ -47,21 +45,19 @@ class Repositories {
 
         const moreRepositoriesQuery = gql`
           query MoreRepositories($afterCursor: String) {
-            search(
-              query: "org:google"
-              type: REPOSITORY
-              first: 100
-              after: $afterCursor
-            ) {
-              nodes {
-                ... on Repository {
-                  name
+            organization(login: "Google") {
+              repositories(first: 100, after: $afterCursor) {
+                edges {
+                  node {
+                    name
+                  }
                 }
-              }
-              pageInfo {
-                startCursor
-                hasNextPage
-                endCursor
+                totalCount
+                pageInfo {
+                  startCursor
+                  hasNextPage
+                  endCursor
+                }
               }
             }
             rateLimit {
@@ -84,16 +80,22 @@ class Repositories {
           query,
         });
 
+        result.data.organization.repositories.edges.map((edge: any) => {
+          repos.push({ name: edge.node.name });
+        });
+
         let hasNextPage = false;
         let afterCursor = "";
 
-        console.log(result.data.search.pageInfo);
+        console.log(result.data.organization.repositories.pageInfo);
 
-        const repositoryCount = result.data.search.repositoryCount;
+        const repositoryCount =
+          result.data.organization.repositories.totalCount;
 
-        if (result.data.search.pageInfo.hasNextPage) {
+        if (result.data.organization.repositories.pageInfo.hasNextPage) {
           hasNextPage = true;
-          afterCursor = result.data.search.pageInfo.endCursor;
+          afterCursor =
+            result.data.organization.repositories.pageInfo.endCursor;
           console.log(afterCursor);
         }
 
@@ -105,15 +107,17 @@ class Repositories {
             query: moreRepositoriesQuery,
             variables: { afterCursor },
           });
-          result.data.search.nodes.map((repo: Repo) => {
-            repos.push({ name: repo.name });
+          result.data.organization.repositories.edges.map((edge: any) => {
+            repos.push({ name: edge.node.name });
           });
-          hasNextPage = result.data.search.pageInfo.hasNextPage;
-          console.log(result.data.search.pageInfo);
+          hasNextPage =
+            result.data.organization.repositories.pageInfo.hasNextPage;
+          console.log(result.data.organization.repositories.pageInfo);
 
           if (hasNextPage) {
             // there are more pages left; move cursor forward to prepare for next iteration
-            afterCursor = result.data.search.pageInfo.endCursor;
+            afterCursor =
+              result.data.organization.repositories.pageInfo.endCursor;
 
             console.log(result.data.rateLimit);
           }
