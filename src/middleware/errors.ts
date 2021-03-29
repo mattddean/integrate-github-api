@@ -11,7 +11,7 @@ export const catchAsyncRequest = (handler: PromiseRequestHandler) => (
   ...args: [Request, Response, NextFunction]
 ) => handler(...args).catch(args[2]);
 
-export const InternalServerError = (
+export const InternalError = (
   err: any,
   req: Request,
   res: Response,
@@ -22,7 +22,7 @@ export const InternalServerError = (
   }
   res
     .status(err.status || 500)
-    .json({ message: err.message || "Internal Server Error" });
+    .json({ message: "Internal Error: " + err?.message ?? "" });
 };
 
 export const NotFoundError = (

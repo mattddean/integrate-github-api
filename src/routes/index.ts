@@ -1,1 +1,1 @@
-export { default as repositories } from "./repositories";
+export { default as Repositories } from "./Repositories";
