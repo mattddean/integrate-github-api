@@ -19,7 +19,11 @@ class Repositories {
       catchAsyncRequest(async (req, res) => {
         const query = gql`
           query Repostiories {
-            search(query: "org:google", type: REPOSITORY, first: 100) {
+            search(
+              query: "org:google created:>2007-10-29 is:public"
+              type: REPOSITORY
+              first: 100
+            ) {
               nodes {
                 ... on Repository {
                   name
