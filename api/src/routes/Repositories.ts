@@ -17,7 +17,7 @@ class Repositories {
       "/v1/google/repositories",
       catchAsyncRequest(async (req, res) => {
         const query = gql`
-          query RepositoriesQuery($afterCursor: string) {
+          {
             search(
               query: "org:google"
               type: REPOSITORY

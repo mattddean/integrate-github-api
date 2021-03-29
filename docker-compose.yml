@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile-dev-node
+      args:
+        USER_ID: ${CURRENT_USER_ID}
+        GROUP_ID: ${CURRENT_GROUP_ID}
+    ports:
+      - 8080:3000
+    volumes:
+      - ./src:/usr/src/app
+      - backend_home_npm:/home/node/.npm
+    environment:
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+    command: ["npm", "run", "dev"]
+
+volumes:
+  # persistent npm cache
+  backend_home_npm:
