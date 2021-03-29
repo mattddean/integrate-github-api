@@ -3,9 +3,11 @@ import { Router } from "express";
 import { catchAsyncRequest } from "../middleware";
 // import { validate, loginSchema } from "../validation";
 import gql from "graphql-tag";
-import { ApolloClient, NormalizedCacheObject } from "@apollo/client/core";
+import { ApolloClient } from "@apollo/client/core";
+import { NormalizedCacheObject } from "@apollo/client";
 import { FailedToGetAllReposError } from "../errors";
 import { compressJsonToFile } from "../files";
+import { REPO_FILE_OUTPUT_PATH } from "../config";
 
 type Repo = {
   name: string;
@@ -149,9 +151,11 @@ class Repositories {
       catchAsyncRequest(async (req, res) => {
         const repos = await this.getRepos();
 
-        await compressJsonToFile("/tmp/knock_interview.json.gz", repos);
+        await compressJsonToFile(REPO_FILE_OUTPUT_PATH, repos);
 
-        res.json({ message: "hello" });
+        res.json({
+          message: `Successfully wrote repos to  + ${REPO_FILE_OUTPUT_PATH}`,
+        });
       })
     );
   }
