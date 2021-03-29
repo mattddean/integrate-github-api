@@ -24,15 +24,7 @@ export const createApp = () => {
     uri: "https://api.github.com/graphql",
     fetch: fetch,
   });
-  const cache = new InMemoryCache({
-    typePolicies: {
-      Query: {
-        fields: {
-          search: relayStylePagination(["query"]),
-        },
-      },
-    },
-  });
+  const cache = new InMemoryCache();
   const authLink = setContext((_, { headers }) => {
     // get the authentication token from local storage if it exists
     const token = GITHUB_TOKEN;

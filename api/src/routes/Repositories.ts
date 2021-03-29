@@ -1,9 +1,10 @@
 import { Router } from "express";
 // import { logIn, logOut } from "../auth";
-import { catchAsyncRequest } from "../middleware";
+import { catchAsyncRequest, InternalError } from "../middleware";
 // import { validate, loginSchema } from "../validation";
 import gql from "graphql-tag";
 import { ApolloClient, NormalizedCacheObject } from "@apollo/client/core";
+import { FailedToGetAllReposError, InternalServerError } from "../errors";
 
 class Repositories {
   #router = Router();
@@ -17,7 +18,31 @@ class Repositories {
       "/v1/google/repositories",
       catchAsyncRequest(async (req, res) => {
         const query = gql`
-          {
+          query Repostiories {
+            search(query: "org:google", type: REPOSITORY, first: 100) {
+              nodes {
+                ... on Repository {
+                  name
+                }
+              }
+              repositoryCount
+              pageInfo {
+                startCursor
+                hasNextPage
+                endCursor
+              }
+            }
+            rateLimit {
+              limit
+              cost
+              remaining
+              resetAt
+            }
+          }
+        `;
+
+        const moreRepositoriesQuery = gql`
+          query MoreRepositories($afterCursor: String) {
             search(
               query: "org:google"
               type: REPOSITORY
@@ -30,8 +55,16 @@ class Repositories {
                 }
               }
               pageInfo {
+                startCursor
+                hasNextPage
                 endCursor
               }
+            }
+            rateLimit {
+              limit
+              cost
+              remaining
+              resetAt
             }
           }
         `;
@@ -40,29 +73,55 @@ class Repositories {
           name: string;
         };
 
+        // We'll fill this with the names of the repos we retrieve.
+        const repos: Repo[] = [];
+
+        const result = await apolloClient.query({
+          query,
+        });
+
+        let hasNextPage = false;
         let afterCursor = "";
 
-        // We'll fill this with the names of the repos we retrieve.
-        const repos: string[] = [];
+        console.log(result.data.search.pageInfo);
+
+        const repositoryCount = result.data.search.repositoryCount;
+
+        if (result.data.search.pageInfo.hasNextPage) {
+          hasNextPage = true;
+          afterCursor = result.data.search.pageInfo.endCursor;
+          console.log(afterCursor);
+        }
 
         // Append repositories to our repos array until we've paginated through all of the repositories that match our search.
         // We'll break out of this loop with a break statement.
         // eslint-disable-next-line no-constant-condition
-        while (true) {
+        while (hasNextPage) {
           const result = await apolloClient.query({
-            query,
+            query: moreRepositoriesQuery,
             variables: { afterCursor },
           });
           result.data.search.nodes.map((repo: Repo) => {
-            repos.concat(repo.name);
+            repos.push({ name: repo.name });
           });
-          if (result.data.search.pageInfo.hasNextPage) {
-            // there are more pages left; move cursor forward
+          hasNextPage = result.data.search.pageInfo.hasNextPage;
+          console.log(result.data.search.pageInfo);
+
+          if (hasNextPage) {
+            // there are more pages left; move cursor forward to prepare for next iteration
             afterCursor = result.data.search.pageInfo.endCursor;
-          } else {
-            // finished paginating; break out of loop
-            break;
+
+            console.log(result.data.rateLimit);
           }
+        }
+
+        // Throw an error if we got fewer repos than were specifeid by repositoryCount
+        if (repos.length != repositoryCount) {
+          throw new FailedToGetAllReposError(
+            "google",
+            repositoryCount,
+            repos.length
+          );
         }
 
         // Send back our finished array of repos.
