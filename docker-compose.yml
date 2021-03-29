@@ -9,12 +9,11 @@ services:
         USER_ID: ${CURRENT_USER_ID}
         GROUP_ID: ${CURRENT_GROUP_ID}
     ports:
-      - 8080:3000
+      - 3000:3000
     volumes:
       - ./api:/usr/src/app
       - backend_home_npm:/home/node/.npm
-    environment:
-      GITHUB_TOKEN: ${GITHUB_TOKEN}
+    env_file: ./api/.env
     command: ["npm", "run", "dev"]
 
 volumes:
