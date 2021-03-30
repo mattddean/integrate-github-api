@@ -38,7 +38,7 @@ docker stop <container_id>
 
 ## GraphQL Rationale
 
-Using GitHub's GraphQL API rather than its REST one gives me two benefits
+Using GitHub's GraphQL API rather than their REST one gives me two benefits:
 
 - I can demonstrate my ability to use / adapt to GraphQL
 - Best chance of avoiding deprecation
