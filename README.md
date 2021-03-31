@@ -44,6 +44,12 @@ Using GitHub's GraphQL API rather than their REST one gives me two benefits:
 - Best chance of avoiding deprecation
   - GitHub's GraphQL API is their newest API. In fact, they call it "V4" of their API rather than just a GraphQL version of V3. If further development is needed on this integration project, we're most likely to have access to GitHub's newest features if we use their newest API.
 
+## Update to latest Docker Image
+
+```bash
+docker pull mattddean/integrate_github_api:latest
+```
+
 ## Set up development environment
 
 ### Dependencies
@@ -91,4 +97,4 @@ docker push <your_docker_hub_username>/integrate_github_api
 
 ## TODO
 
-- Build
+- Add GitHub's GraphQL Schema to our Apollo Client for client-side validation
