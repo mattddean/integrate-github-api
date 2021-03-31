@@ -80,8 +80,6 @@ export const getRepos = async (
 
   // We'll fill this with the names of the repos we retrieve.
   const repos: Repo[] = [];
-  console.log("organization:");
-  console.log(organization);
 
   let result;
 
@@ -106,14 +104,11 @@ export const getRepos = async (
   let hasNextPage = false;
   let afterCursor = "";
 
-  console.log(result.data.organization.repositories.pageInfo);
-
   const repositoryCount = result.data.organization.repositories.totalCount;
 
   if (result.data.organization.repositories.pageInfo.hasNextPage) {
     hasNextPage = true;
     afterCursor = result.data.organization.repositories.pageInfo.endCursor;
-    console.log(afterCursor);
   }
 
   // Append repositories to our repos array until we've paginated through all of the repositories that match our search.
@@ -137,7 +132,6 @@ export const getRepos = async (
       repos.push({ name: edge.node.name });
     });
     hasNextPage = result.data.organization.repositories.pageInfo.hasNextPage;
-    console.log(result.data.organization.repositories.pageInfo);
 
     if (hasNextPage) {
       // there are more pages left; move cursor forward to prepare for next iteration
