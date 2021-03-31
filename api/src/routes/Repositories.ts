@@ -123,7 +123,7 @@ class Repositories {
       }
     }
 
-    // Throw an error if we got fewer repos than were specifeid by repositoryCount.
+    // Throw an error if we got fewer repos than were specified by repositoryCount.
     if (repos.length != repositoryCount) {
       throw new FailedToGetAllReposError(
         "google",

@@ -60,6 +60,14 @@ CURRENT_USER_ID=$(id -u) CURRENT_GROUP_ID=$(id -g) docker-compose up backend
 
 You should now be able to issue API requests on your host machine to localhost:3000
 
+### Get a shell in your Docker dev environment
+
+With the backend container "up", run:
+
+```bash
+docker-compose exec backend bash
+```
+
 ## Building for Production
 
 The app can be easily pushed to your Docker Hub registry as a container with the following commands
