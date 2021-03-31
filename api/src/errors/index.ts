@@ -12,6 +12,14 @@ export class FailedToGetAllReposError extends HttpError {
   }
 }
 
+export class HitRateLimitError extends HttpError {
+  constructor(resetAt: string, thirdPartyApi: string) {
+    super(`Hit ${thirdPartyApi}'s rate limit. Try again at ${resetAt}`);
+
+    this.status = 503;
+  }
+}
+
 export class BadRequest extends HttpError {
   constructor(message = "Bad Request") {
     super(message);

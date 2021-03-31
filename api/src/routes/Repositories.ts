@@ -46,21 +46,6 @@ class Repositories {
   getRouter() {
     return this.#router;
   }
-
-  // const oldQuery = gql`organization(login:"Google") {
-  //   repositories(first: 100, after:"Y3Vyc29yOjEwMA==") {
-  //     edges {
-  //       node {
-  //         id
-  //         name
-  //       }
-  //     }
-  //     pageInfo {
-  //       endCursor
-  //       hasNextPage
-  //     }
-  //   }
-  // }`;
 }
 
 export default Repositories;

@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import { FailedToGetAllReposError } from "../errors";
+import { FailedToGetAllReposError, HitRateLimitError } from "../errors";
 import { ApolloClient } from "@apollo/client/core";
 import { NormalizedCacheObject } from "@apollo/client";
 
@@ -12,7 +12,7 @@ export const getRepos = async (
 ): Promise<Repo[]> => {
   const query = gql`
     query Repostiories {
-      organization(login: "Google") {
+      organization(login: "google") {
         repositories(first: 100) {
           edges {
             node {
@@ -38,7 +38,7 @@ export const getRepos = async (
 
   const moreRepositoriesQuery = gql`
     query MoreRepositories($afterCursor: String) {
-      organization(login: "Google") {
+      organization(login: "google") {
         repositories(first: 100, after: $afterCursor) {
           edges {
             node {
@@ -104,7 +104,11 @@ export const getRepos = async (
       // there are more pages left; move cursor forward to prepare for next iteration
       afterCursor = result.data.organization.repositories.pageInfo.endCursor;
 
-      console.log(result.data.rateLimit);
+      // check for remaining requests in our rate limit
+      const { rateLimit } = result.data;
+      if (rateLimit.remaining < 1) {
+        throw new HitRateLimitError(rateLimit.resetAt, "GitHub");
+      }
     }
   }
 
