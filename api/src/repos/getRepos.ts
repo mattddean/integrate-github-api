@@ -1,11 +1,25 @@
 import gql from "graphql-tag";
-import { FailedToGetAllReposError, HitRateLimitError } from "../errors";
+import {
+  FailedToGetAllReposError,
+  HitRateLimitError,
+  ThirdPartyApiError,
+} from "../errors";
 import { ApolloClient } from "@apollo/client/core";
 import { NormalizedCacheObject } from "@apollo/client";
 import { THIRD_PARTY_NAME } from "../config";
 
 type Repo = {
   name: string;
+};
+
+/**
+ * Try to get the error message from third party, but if not possible, simply report "Unknown error"
+ */
+const handleThirdPartyError = (res: any) => {
+  const thirdPartyErrorMessage =
+    res?.data?.errors?.[0]?.message ?? "Unknown error";
+
+  throw new ThirdPartyApiError(thirdPartyErrorMessage, THIRD_PARTY_NAME);
 };
 
 export const getRepos = async (
@@ -69,10 +83,21 @@ export const getRepos = async (
   console.log("organization:");
   console.log(organization);
 
-  const result = await apolloClient.query({
-    query,
-    variables: { organization },
-  });
+  let result;
+
+  try {
+    result = await apolloClient.query({
+      query,
+      variables: { organization },
+    });
+  } catch {
+    handleThirdPartyError(result);
+
+    // We throw from handleThirdPartyError, but the rest of this code does not know that,
+    // so we need to tell TypeScript that we won't continue this function
+    // so it doesn't complain about result being possibly undefined
+    return [{ name: "" }];
+  }
 
   result.data.organization.repositories.edges.map((edge: any) => {
     repos.push({ name: edge.node.name });
@@ -95,10 +120,19 @@ export const getRepos = async (
   // We'll break out of this loop with a break statement.
   // eslint-disable-next-line no-constant-condition
   while (hasNextPage) {
-    const result = await apolloClient.query({
-      query: moreRepositoriesQuery,
-      variables: { afterCursor, organization: organization },
-    });
+    try {
+      result = await apolloClient.query({
+        query: moreRepositoriesQuery,
+        variables: { afterCursor, organization: organization },
+      });
+    } catch {
+      handleThirdPartyError(result);
+
+      // We throw from handleThirdPartyError, but the rest of this code does not know that,
+      // so we need to tell TypeScript that we won't continue this function
+      // so it doesn't complain about result being possibly undefined
+      return [{ name: "" }];
+    }
     result.data.organization.repositories.edges.map((edge: any) => {
       repos.push({ name: edge.node.name });
     });

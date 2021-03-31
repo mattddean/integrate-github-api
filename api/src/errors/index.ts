@@ -20,6 +20,12 @@ export class HitRateLimitError extends HttpError {
   }
 }
 
+export class ThirdPartyApiError extends HttpError {
+  constructor(message: string, thirdPartyApi: string) {
+    super(`${thirdPartyApi} error: ${message}`);
+  }
+}
+
 export class BadRequest extends HttpError {
   constructor(message = "Bad Request") {
     super(message);
