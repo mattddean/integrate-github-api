@@ -11,7 +11,7 @@ Repository structure and some functions, like catchAsyncRequest, are inherited f
 
 ## Single Command Run
 
-Create a file called `.env` in your current directory with contents:
+Create a file called `.env` in the directory from which you'll run the Docker container with contents:
 
 ```txt
 THIRD_PARTY_TOKEN=<your_github_personal_access_token>
