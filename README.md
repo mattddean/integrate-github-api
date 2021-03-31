@@ -23,7 +23,16 @@ Then run:
 docker run --rm -p '3000:3000' --env-file .env mattddean/integrate_github_api:latest
 ```
 
-> Docker will automatically download the latest version of the container from Docker Hub
+Then, to get a shell into this running container to verify that the /tmp/knock_interview.json.gz file was successfully built, run:
+
+````bash
+docker ps # note the Container ID associated with the mattddean/integrate_github_api:latest image
+docker exec -it <container_id> bash
+```
+
+> Docker will automatically download the image from Docker Hub
+
+> Note that because the app is running in Docker, it will write the /tmp/knock_interview.json.gz to the container's filesystem, not to the host filesystem
 
 ### Stopping this container
 
@@ -32,7 +41,7 @@ In another shell, run:
 ```bash
 docker ps # take note of the relevant Container ID
 docker stop <container_id>
-```
+````
 
 > Replace `<container_id>` with the relevant Container ID you found when running `docker ps`
 
@@ -88,9 +97,9 @@ The app can be easily pushed to your Docker Hub registry as a container with the
 
 ```bash
 cd api
-docker build -t <your_docker_hub_username>/integrate_github_api .
+docker build -t <your_docker_hub_username>/integrate_github_api:latest .
 docker login
-docker push <your_docker_hub_username>/integrate_github_api
+docker push <your_docker_hub_username>/integrate_github_api:latest
 ```
 
 > Replace `<your_docker_hub_username>` with your Docker Hub Username
