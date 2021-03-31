@@ -25,9 +25,17 @@ docker run --rm -p '3000:3000' --env-file .env mattddean/integrate_github_api:la
 
 Then, to get a shell into this running container to verify that the /tmp/knock_interview.json.gz file was successfully built, run:
 
-````bash
+```bash
 docker ps # note the Container ID associated with the mattddean/integrate_github_api:latest image
 docker exec -it <container_id> bash
+
+```
+
+To stop the image, run:
+
+```bash
+docker ps # note the Container ID associated with the mattddean/integrate_github_api:latest image
+docker stop <container_id>
 ```
 
 > Docker will automatically download the image from Docker Hub
@@ -41,7 +49,7 @@ In another shell, run:
 ```bash
 docker ps # take note of the relevant Container ID
 docker stop <container_id>
-````
+```
 
 > Replace `<container_id>` with the relevant Container ID you found when running `docker ps`
 
