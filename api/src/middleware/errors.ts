@@ -1,4 +1,5 @@
 import { RequestHandler, Request, Response, NextFunction } from "express";
+import { NODE_ENV } from "../config";
 
 // https://stackoverflow.com/a/50014868/7472250
 type ReplaceReturnType<T extends (...a: any) => any, TNewReturn> = (
@@ -20,9 +21,13 @@ export const InternalError = (
   if (!err.status) {
     console.error(err.stack);
   }
-  res
-    .status(err.status || 500)
-    .json({ message: "Internal Error: " + err?.message ?? "" });
+  // don't expose inner workings to production user
+  const message =
+    NODE_ENV == "production" ? "Internal Error" : err?.message ?? "";
+
+  res.status(err.status || 500).json({
+    message,
+  });
 };
 
 export const NotFoundError = (

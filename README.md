@@ -14,7 +14,7 @@ Repository structure and some functions, like catchAsyncRequest, are inherited f
 Create a file called `.env` in your current directory with contents:
 
 ```txt
-GITHUB_TOKEN=<your_github_personal_access_token>
+THIRD_PARTY_TOKEN=<your_github_personal_access_token>
 ```
 
 Then run:
@@ -66,6 +66,14 @@ With the backend container "up", run:
 
 ```bash
 docker-compose exec backend bash
+```
+
+In the shell exposed by the last command, run:
+
+### Run tests
+
+```bash
+npm run test
 ```
 
 ## Building for Production

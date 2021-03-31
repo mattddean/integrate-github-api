@@ -1,5 +1,5 @@
 export * from "./app";
 
-export * from "./auth";
+export * from "./thirdPartyApi";
 
 export * from "./files";

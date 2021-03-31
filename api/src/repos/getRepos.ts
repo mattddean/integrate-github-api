@@ -2,17 +2,19 @@ import gql from "graphql-tag";
 import { FailedToGetAllReposError, HitRateLimitError } from "../errors";
 import { ApolloClient } from "@apollo/client/core";
 import { NormalizedCacheObject } from "@apollo/client";
+import { THIRD_PARTY_NAME } from "../config";
 
 type Repo = {
   name: string;
 };
 
 export const getRepos = async (
-  apolloClient: ApolloClient<NormalizedCacheObject>
+  apolloClient: ApolloClient<NormalizedCacheObject>,
+  organization: string
 ): Promise<Repo[]> => {
   const query = gql`
-    query Repostiories {
-      organization(login: "google") {
+    query Repostiories($organization: String!) {
+      organization(login: $organization) {
         repositories(first: 100) {
           edges {
             node {
@@ -37,8 +39,8 @@ export const getRepos = async (
   `;
 
   const moreRepositoriesQuery = gql`
-    query MoreRepositories($afterCursor: String) {
-      organization(login: "google") {
+    query MoreRepositories($afterCursor: String!, $organization: String!) {
+      organization(login: $organization) {
         repositories(first: 100, after: $afterCursor) {
           edges {
             node {
@@ -64,9 +66,12 @@ export const getRepos = async (
 
   // We'll fill this with the names of the repos we retrieve.
   const repos: Repo[] = [];
+  console.log("organization:");
+  console.log(organization);
 
   const result = await apolloClient.query({
     query,
+    variables: { organization },
   });
 
   result.data.organization.repositories.edges.map((edge: any) => {
@@ -92,7 +97,7 @@ export const getRepos = async (
   while (hasNextPage) {
     const result = await apolloClient.query({
       query: moreRepositoriesQuery,
-      variables: { afterCursor },
+      variables: { afterCursor, organization: organization },
     });
     result.data.organization.repositories.edges.map((edge: any) => {
       repos.push({ name: edge.node.name });
@@ -107,14 +112,18 @@ export const getRepos = async (
       // check for remaining requests in our rate limit
       const { rateLimit } = result.data;
       if (rateLimit.remaining < 1) {
-        throw new HitRateLimitError(rateLimit.resetAt, "GitHub");
+        throw new HitRateLimitError(rateLimit.resetAt, THIRD_PARTY_NAME);
       }
     }
   }
 
   // Throw an error if we got fewer repos than were specified by repositoryCount.
   if (repos.length != repositoryCount) {
-    throw new FailedToGetAllReposError("google", repositoryCount, repos.length);
+    throw new FailedToGetAllReposError(
+      organization,
+      repositoryCount,
+      repos.length
+    );
   }
 
   // Return our finished array of repos.

@@ -1,7 +1,5 @@
 import { Router } from "express";
-// import { logIn, logOut } from "../auth";
 import { catchAsyncRequest } from "../middleware";
-// import { validate, loginSchema } from "../validation";
 import { ApolloClient } from "@apollo/client/core";
 import { NormalizedCacheObject } from "@apollo/client";
 import { compressJsonToFile } from "../files";
@@ -21,18 +19,24 @@ class Repositories {
 
   addRoutes() {
     this.#router.get(
-      "/v1/google/repositories",
+      "/v1/:organization/repositories",
       catchAsyncRequest(async (req, res) => {
-        const repos = await getRepos(this.#apolloClient);
+        const repos = await getRepos(
+          this.#apolloClient,
+          req.params.organization
+        );
 
         res.json(repos);
       })
     );
 
     this.#router.put(
-      "/v1/google/repositories/to_file",
+      "/v1/:organization/repositories/to_file",
       catchAsyncRequest(async (req, res) => {
-        const repos = await getRepos(this.#apolloClient);
+        const repos = await getRepos(
+          this.#apolloClient,
+          req.params.organization
+        );
 
         await compressJsonToFile(REPO_FILE_OUTPUT_PATH, repos);
 

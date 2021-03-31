@@ -10,23 +10,21 @@ import fetch from "cross-fetch";
 
 import { InternalError, NotFoundError } from "./middleware";
 import { Repositories } from "./routes";
-import { GITHUB_TOKEN } from "./config";
+import { THIRD_PARTY_TOKEN, THIRD_PARTY_API_URL } from "./config";
 
 export const createApp = () => {
   const app = express();
 
-  console.log(GITHUB_TOKEN);
-
   app.use(express.json());
 
   const httpLink = createHttpLink({
-    uri: "https://api.github.com/graphql",
+    uri: THIRD_PARTY_API_URL,
     fetch: fetch,
   });
   const cache = new InMemoryCache();
   const authLink = setContext((_, { headers }) => {
     // get the authentication token from local storage if it exists
-    const token = GITHUB_TOKEN;
+    const token = THIRD_PARTY_TOKEN;
     // return the headers to the context so httpLink can read them
     return {
       headers: {
