@@ -41,7 +41,7 @@ class Repositories {
         await compressJsonToFile(REPO_FILE_OUTPUT_PATH, repos);
 
         res.json({
-          message: `Successfully wrote repos to  + ${REPO_FILE_OUTPUT_PATH}`,
+          message: `Successfully wrote repos to ${REPO_FILE_OUTPUT_PATH}`,
         });
       })
     );
