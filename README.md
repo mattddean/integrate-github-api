@@ -127,7 +127,7 @@ npm run test
 
 ## Building for Production
 
-The app can be easily pushed to your Docker Hub registry as a container with the following commands
+The app can be pushed to your Docker Hub registry as a container with the following commands:
 
 ```bash
 cd api
@@ -136,7 +136,7 @@ docker login
 docker push <your_docker_hub_username>/integrate_github_api:latest
 ```
 
-> Replace `<your_docker_hub_username>` with your Docker Hub Username
+> Replace `<your_docker_hub_username>` with your Docker Hub Username.
 
 ## TODO
 
