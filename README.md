@@ -140,4 +140,5 @@ docker push <your_docker_hub_username>/integrate_github_api:latest
 
 ## TODO
 
-- Add GitHub's GraphQL Schema to our Apollo Client for client-side validation
+- Distinguish between an error in connecting to the third party and an error reported from the third party
+- Handle In-Memory cache warning from Apollo that is reported when running tests

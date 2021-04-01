@@ -22,7 +22,7 @@ const handleThirdPartyError = (e: ApolloError): Repo[] => {
     errorMessage += message += ",";
   });
 
-  throw new ThirdPartyApiError(errorMessage, THIRD_PARTY_NAME, e);
+  throw new ThirdPartyApiError(errorMessage, e);
 };
 
 export const getRepos = async (
@@ -61,30 +61,30 @@ export const getRepos = async (
   // We'll break out of this loop with a break statement.
   // eslint-disable-next-line no-constant-condition
 
-  let secondResult;
+  let supplementalResult;
 
   while (hasNextPage) {
     try {
-      secondResult = await apolloClient.query({
+      supplementalResult = await apolloClient.query({
         query: moreRepositoriesQuery,
         variables: { afterCursor, organization: organization },
       });
     } catch (e) {
       return handleThirdPartyError(e);
     }
-    secondResult.data.organization.repositories.edges.map((edge: any) => {
+    supplementalResult.data.organization.repositories.edges.map((edge: any) => {
       repos.push({ name: edge.node.name });
     });
     hasNextPage =
-      secondResult.data.organization.repositories.pageInfo.hasNextPage;
+      supplementalResult.data.organization.repositories.pageInfo.hasNextPage;
 
     if (hasNextPage) {
       // there are more pages left; move cursor forward to prepare for next iteration
       afterCursor =
-        secondResult.data.organization.repositories.pageInfo.endCursor;
+        supplementalResult.data.organization.repositories.pageInfo.endCursor;
 
       // check for remaining requests in our rate limit
-      const { rateLimit } = secondResult.data;
+      const { rateLimit } = supplementalResult.data;
       if (rateLimit.remaining < 1) {
         throw new HitRateLimitError(rateLimit.resetAt, THIRD_PARTY_NAME);
       }

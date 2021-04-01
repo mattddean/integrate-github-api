@@ -22,8 +22,8 @@ export class HitRateLimitError extends HttpError {
 }
 
 export class ThirdPartyApiError extends HttpError {
-  constructor(message: string, thirdPartyApi: string, error: any) {
-    super(`${thirdPartyApi} error: ${message}`);
+  constructor(message: string, error: any) {
+    super(`Third Party API Error: ${message}`);
 
     this.status = 503;
     this.thirdPartyApiError = error;
