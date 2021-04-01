@@ -142,3 +142,4 @@ docker push <your_docker_hub_username>/integrate_github_api:latest
 
 - Distinguish between an error in connecting to the third party and an error reported from the third party
 - Handle In-Memory cache warning from Apollo that is reported when running tests
+- Set up GitHub Actions to automatically build Docker Image and push to Docker Hub
