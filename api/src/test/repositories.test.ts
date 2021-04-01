@@ -9,6 +9,7 @@ import { createApp } from "../app";
 import { gunzipSync } from "zlib";
 import { readFileSync, unlinkSync, existsSync } from "fs";
 import { REPO_FILE_OUTPUT_PATH, THIRD_PARTY_NAME } from "../config";
+import { HttpError } from "../errors";
 
 const app = createApp();
 
@@ -48,6 +49,11 @@ describe("Repository Endpoints", () => {
     expect(res.status).toEqual(503);
     expect(res.body.message).toEqual(
       expect.stringContaining(`${THIRD_PARTY_NAME} error`)
+    );
+    const error = res.body.error as HttpError;
+    console.log(error.thirdPartyApiError.graphQLErrors);
+    expect(error.thirdPartyApiError.graphQLErrors[0].type == "NOT_FOUND").toBe(
+      true
     );
   });
 });

@@ -1,6 +1,6 @@
-abstract class HttpError extends Error {
+export abstract class HttpError extends Error {
   public status!: number;
-  public graphQLError?: any;
+  public thirdPartyApiError?: any;
 }
 
 export class FailedToGetAllReposError extends HttpError {
@@ -26,7 +26,7 @@ export class ThirdPartyApiError extends HttpError {
     super(`${thirdPartyApi} error: ${message}`);
 
     this.status = 503;
-    this.graphQLError = error;
+    this.thirdPartyApiError = error;
   }
 }
 
