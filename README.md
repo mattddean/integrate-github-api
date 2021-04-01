@@ -4,8 +4,10 @@
 
 This project uses GitHub's v4 API, which is based on GraphQL, to expose a REST API that's with the following functionality:
 
-- Get the names of Google's public repositories
-- Write the names of Google's public repositories to a compressed JSON file on the server
+- GET /v1/<github_organization_name>/repositories
+  - Get the names of <github_organization_name>'s public repositories
+- PUT /v1/<github_organization_name>/repositories/to_file
+  - Write the names of <github_organization_name>'s public repositories to a compressed JSON file on the server
 
 Repository structure and some functions, like catchAsyncRequest, are inherited from YouTube series: https://www.youtube.com/playlist?list=PLcCp4mjO-z9_HmJ5rSonmiEGfP-kyRMlI
 
@@ -23,12 +25,13 @@ Then run:
 docker run --rm -p '3000:3000' --env-file .env mattddean/integrate_github_api:latest
 ```
 
+> You should now be able to issue REST requests to http://localhost:3000 and receive responses from the Node.js application running in the container you just started.
+
 Then, to get a shell into this running container to verify that the /tmp/knock_interview.json.gz file was successfully built, run:
 
 ```bash
 docker ps # note the Container ID associated with the mattddean/integrate_github_api:latest image
 docker exec -it <container_id> bash
-
 ```
 
 To stop the image, run:
@@ -69,11 +72,34 @@ docker pull mattddean/integrate_github_api:latest
 
 ## Set up development environment
 
-### Dependencies
+### Host Machine Dependencies
 
 - Docker
 
-Run the following command to start your dev environment
+### Setting up your dev environment for the first time
+
+You'll only need to perform these tasks once for a new host machine.
+
+Create a <repo_root>/api/.env file with the following contents:
+
+```txt
+THIRD_PARTY_TOKEN=<your_github_personal_access_token>
+```
+
+> This is needed in order to authenticate on GitHub's v4 GraphQL API. See this page for instructions on creating a GitHub Personal Access Token: https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
+
+Install npm dependencies:
+
+```bash
+docker-compose run backend bash
+# in the shell that opens...
+npm install
+exit
+```
+
+### Starting your dev environment
+
+Run the following command to start your dev environment:
 
 ```bash
 CURRENT_USER_ID=$(id -u) CURRENT_GROUP_ID=$(id -g) docker-compose up backend
@@ -91,9 +117,9 @@ With the backend container "up", run:
 docker-compose exec backend bash
 ```
 
-In the shell exposed by the last command, run:
+## Run tests
 
-### Run tests
+In [your Docker dev environment's shell](#Get-a-shell-in-your-Docker-dev-environment), run:
 
 ```bash
 npm run test
