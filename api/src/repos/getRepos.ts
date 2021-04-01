@@ -1,12 +1,13 @@
-import gql from "graphql-tag";
+import { ApolloClient, ApolloError } from "@apollo/client/core";
+import { NormalizedCacheObject } from "@apollo/client";
+
+import { THIRD_PARTY_NAME } from "../config";
+import { repositoriesQuery, moreRepositoriesQuery } from "../graphql/queries";
 import {
   FailedToGetAllReposError,
   HitRateLimitError,
   ThirdPartyApiError,
 } from "../errors";
-import { ApolloClient, ApolloError } from "@apollo/client/core";
-import { NormalizedCacheObject } from "@apollo/client";
-import { THIRD_PARTY_NAME } from "../config";
 
 type Repo = {
   name: string;
@@ -15,7 +16,7 @@ type Repo = {
 /**
  * Try to get the error message from third party, but if not possible, simply report "Unknown error"
  */
-const handleThirdPartyError = (e: ApolloError) => {
+const handleThirdPartyError = (e: ApolloError): Repo[] => {
   let errorMessage = "";
   e.graphQLErrors.map(({ message }) => {
     errorMessage += message += ",";
@@ -28,58 +29,6 @@ export const getRepos = async (
   apolloClient: ApolloClient<NormalizedCacheObject>,
   organization: string
 ): Promise<Repo[]> => {
-  const query = gql`
-    query Repositories($organization: String!) {
-      organization(login: $organization) {
-        repositories(first: 100) {
-          edges {
-            node {
-              name
-            }
-          }
-          totalCount
-          pageInfo {
-            startCursor
-            hasNextPage
-            endCursor
-          }
-        }
-      }
-      rateLimit {
-        limit
-        cost
-        remaining
-        resetAt
-      }
-    }
-  `;
-
-  const moreRepositoriesQuery = gql`
-    query MoreRepositories($afterCursor: String!, $organization: String!) {
-      organization(login: $organization) {
-        repositories(first: 100, after: $afterCursor) {
-          edges {
-            node {
-              name
-            }
-          }
-          totalCount
-          pageInfo {
-            startCursor
-            hasNextPage
-            endCursor
-          }
-        }
-      }
-      rateLimit {
-        limit
-        cost
-        remaining
-        resetAt
-      }
-    }
-  `;
-
   // We'll fill this with the names of the repos we retrieve.
   const repos: Repo[] = [];
 
@@ -87,16 +36,11 @@ export const getRepos = async (
 
   try {
     result = await apolloClient.query({
-      query,
+      query: repositoriesQuery,
       variables: { organization },
     });
   } catch (e) {
-    handleThirdPartyError(e);
-
-    // We throw from handleThirdPartyError, but the rest of this code does not know that,
-    // so we need to tell TypeScript that we won't continue this function
-    // so it doesn't complain about result being possibly undefined
-    return [{ name: "" }];
+    return handleThirdPartyError(e);
   }
 
   result.data.organization.repositories.edges.map((edge: any) => {
@@ -126,12 +70,7 @@ export const getRepos = async (
         variables: { afterCursor, organization: organization },
       });
     } catch (e) {
-      handleThirdPartyError(e);
-
-      // We throw from handleThirdPartyError, but the rest of this code does not know that,
-      // so we need to tell TypeScript that we won't continue this function
-      // so it doesn't complain about secondResult being possibly undefined
-      return [{ name: "" }];
+      return handleThirdPartyError(e);
     }
     secondResult.data.organization.repositories.edges.map((edge: any) => {
       repos.push({ name: edge.node.name });

@@ -51,7 +51,6 @@ describe("Repository Endpoints", () => {
       expect.stringContaining(`${THIRD_PARTY_NAME} error`)
     );
     const error = res.body.error as HttpError;
-    console.log(error.thirdPartyApiError.graphQLErrors);
     expect(error.thirdPartyApiError.graphQLErrors[0].type == "NOT_FOUND").toBe(
       true
     );
