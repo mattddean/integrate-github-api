@@ -4,7 +4,7 @@ import {
   HitRateLimitError,
   ThirdPartyApiError,
 } from "../errors";
-import { ApolloClient } from "@apollo/client/core";
+import { ApolloClient, ApolloError } from "@apollo/client/core";
 import { NormalizedCacheObject } from "@apollo/client";
 import { THIRD_PARTY_NAME } from "../config";
 
@@ -15,11 +15,13 @@ type Repo = {
 /**
  * Try to get the error message from third party, but if not possible, simply report "Unknown error"
  */
-const handleThirdPartyError = (res: any) => {
-  const thirdPartyErrorMessage =
-    res?.data?.errors?.[0]?.message ?? "Unknown error";
+const handleThirdPartyError = (e: ApolloError) => {
+  let errorMessage = "";
+  e.graphQLErrors.map(({ message }) => {
+    errorMessage += message += ",";
+  });
 
-  throw new ThirdPartyApiError(thirdPartyErrorMessage, THIRD_PARTY_NAME);
+  throw new ThirdPartyApiError(errorMessage, THIRD_PARTY_NAME, e);
 };
 
 export const getRepos = async (
@@ -27,7 +29,7 @@ export const getRepos = async (
   organization: string
 ): Promise<Repo[]> => {
   const query = gql`
-    query Repostiories($organization: String!) {
+    query Repositories($organization: String!) {
       organization(login: $organization) {
         repositories(first: 100) {
           edges {
@@ -88,8 +90,8 @@ export const getRepos = async (
       query,
       variables: { organization },
     });
-  } catch {
-    handleThirdPartyError(result);
+  } catch (e) {
+    handleThirdPartyError(e);
 
     // We throw from handleThirdPartyError, but the rest of this code does not know that,
     // so we need to tell TypeScript that we won't continue this function
@@ -114,31 +116,36 @@ export const getRepos = async (
   // Append repositories to our repos array until we've paginated through all of the repositories that match our search.
   // We'll break out of this loop with a break statement.
   // eslint-disable-next-line no-constant-condition
+
+  let secondResult;
+
   while (hasNextPage) {
     try {
-      result = await apolloClient.query({
+      secondResult = await apolloClient.query({
         query: moreRepositoriesQuery,
         variables: { afterCursor, organization: organization },
       });
-    } catch {
-      handleThirdPartyError(result);
+    } catch (e) {
+      handleThirdPartyError(e);
 
       // We throw from handleThirdPartyError, but the rest of this code does not know that,
       // so we need to tell TypeScript that we won't continue this function
-      // so it doesn't complain about result being possibly undefined
+      // so it doesn't complain about secondResult being possibly undefined
       return [{ name: "" }];
     }
-    result.data.organization.repositories.edges.map((edge: any) => {
+    secondResult.data.organization.repositories.edges.map((edge: any) => {
       repos.push({ name: edge.node.name });
     });
-    hasNextPage = result.data.organization.repositories.pageInfo.hasNextPage;
+    hasNextPage =
+      secondResult.data.organization.repositories.pageInfo.hasNextPage;
 
     if (hasNextPage) {
       // there are more pages left; move cursor forward to prepare for next iteration
-      afterCursor = result.data.organization.repositories.pageInfo.endCursor;
+      afterCursor =
+        secondResult.data.organization.repositories.pageInfo.endCursor;
 
       // check for remaining requests in our rate limit
-      const { rateLimit } = result.data;
+      const { rateLimit } = secondResult.data;
       if (rateLimit.remaining < 1) {
         throw new HitRateLimitError(rateLimit.resetAt, THIRD_PARTY_NAME);
       }

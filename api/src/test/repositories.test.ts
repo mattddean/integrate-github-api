@@ -8,7 +8,7 @@ import request from "supertest";
 import { createApp } from "../app";
 import { gunzipSync } from "zlib";
 import { readFileSync, unlinkSync, existsSync } from "fs";
-import { REPO_FILE_OUTPUT_PATH } from "../config";
+import { REPO_FILE_OUTPUT_PATH, THIRD_PARTY_NAME } from "../config";
 
 const app = createApp();
 
@@ -38,5 +38,16 @@ describe("Repository Endpoints", () => {
     const res = await request(app).put("/v1/google/badroute").send();
     expect(res.status).toEqual(404);
     expect(res.body.message).toEqual("Not Found");
+  });
+  it("should receive a Third Party API error", async () => {
+    const res = await request(app)
+      .get(
+        "/v1/asdfa3wifuaweu-unlikely-to-exist-org-fhaiweufhaiuwef/repositories"
+      )
+      .send();
+    expect(res.status).toEqual(503);
+    expect(res.body.message).toEqual(
+      expect.stringContaining(`${THIRD_PARTY_NAME} error`)
+    );
   });
 });

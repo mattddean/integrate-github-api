@@ -27,7 +27,7 @@ docker run --rm -p '3000:3000' --env-file .env mattddean/integrate_github_api:la
 
 > You should now be able to issue REST requests to http://localhost:3000 and receive responses from the Node.js application running in the container you just started.
 
-Then, to get a shell into this running container to verify that the /tmp/knock_interview.json.gz file was successfully built, run:
+Then, to get a shell into this running container to verify that the /tmp/knock_interview.json.gz file was successfully created, run:
 
 ```bash
 docker ps # note the Container ID associated with the mattddean/integrate_github_api:latest image
@@ -111,7 +111,7 @@ You should now be able to issue API requests on your host machine to localhost:3
 
 ### Get a shell in your Docker dev environment
 
-With the backend container "up", run:
+With the backend container "up", run the following in another shell:
 
 ```bash
 docker-compose exec backend bash
