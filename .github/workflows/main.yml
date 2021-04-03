@@ -33,7 +33,7 @@ jobs:
         with:
           context: ./api
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/integrate-github-api:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/integrate_github_api:latest
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
